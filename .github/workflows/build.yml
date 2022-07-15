@@ -1,0 +1,53 @@
+name: Build twipo-synchro
+
+on:
+  push:
+  release:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install cargo-about
+      run: |
+        cargo install cargo-about
+    - name: Build server
+      run: |
+        cargo build --release --target i686-pc-windows-msvc
+    - name: Generate third party license file for the server
+      run: |
+        cargo about generate about.hbs > thirdparty.LICENSE.md
+    - name: Build LanguageBarrier
+    - name: Prepare dist
+      run: |
+        mkdir "dist"
+        mkdir "dist/twipo-synchro"
+        mkdir "dist/NOTES ELITE"
+
+        copy "README.md" "dist/"
+        copy "INSTALL.md" "dist/"
+
+        copy "target/release/twipo-synchro.exe" "dist/twipo-synchro"
+        copy "LICENSE" "dist/twipo-synchro"
+        copy "res/charset.LICENSE.md" "dist/twipo-synchro"
+        copy "thirdparty.LICENSE.md" "dist/twipo-synchro"
+    - name: Create dist zip
+      run: |
+        Compress-Archive -Path dist\* -DestinationPath dist.zip
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: twipo-synchro-${{ github.sha }}.zip
+        path: ./dist.zip
+    - name: Update release
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'created')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./dist.zip
+        asset_name: twipo-synchro-${{ github.ref }}.zip
+        asset_content_type: application/zip

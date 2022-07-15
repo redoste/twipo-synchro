@@ -1,0 +1,21 @@
+Overview
+========
+{{#each overview}}
+* {{name}} ({{count}})
+{{/each}}
+
+All licenses
+============
+{{#each licenses}}
+<details>
+<summary>{{name}}</summary>
+
+{{#each used_by}}
+* {{crate.name}} {{crate.version}}
+{{/each}}
+
+------
+
+{{text}}
+</details>
+{{/each}}

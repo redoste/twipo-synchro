@@ -1,0 +1,19 @@
+name: Check twipo-synchro
+
+on:
+  pull_request:
+  push:
+  release:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clippy
+      run: |
+        cargo clippy
+    - name: Check formatting
+      run: |
+        cargo fmt --all -- --check

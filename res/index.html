@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Twipo</title>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+body {
+	margin: 0px;
+	background-image: url("img/bg.png");
+	background-size: cover;
+}
+#app {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+.header_box {
+	position: relative;
+	flex: 0 1 auto;
+}
+.tweep_box {
+	flex: 1 1 auto;
+	overflow-y: scroll;
+	display: none;
+}
+
+#header_img, #unsel_img {
+	width: 100%;
+	display: block;
+}
+.sel_img {
+	position: absolute;
+	height: 100%;
+	top: 0px;
+	opacity: 0%;
+	cursor: pointer;
+}
+#sel_a { left: 0%; }
+#sel_b { left: 25%; }
+#sel_c { right: 25%; }
+#sel_d { right: 0%; }
+
+.author {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+.author > img {
+	margin-right: 10px;
+	margin-bottom: 10px;
+	max-width: 15%;
+}
+
+.tweep {
+	padding: 10px;
+	border: gray outset 1px;
+}
+.details {
+	font-size: smaller;
+	color: grey;
+	margin-top: 5px;
+	display: flex;
+	flex-direction: row;
+	align-items: end;
+}
+.details > span {
+	flex: 1 1 auto;
+}
+.details_button {
+	flex: 0 1 auto;
+	cursor: pointer;
+}
+.details_button > img {
+	width: 20vh;
+}
+
+/* TODO : Extract exact color & font (Noto Sans CJK JP) */
+.ruby {
+	color: blue;
+}
+		</style>
+		<script src="index.js"></script>
+	</head>
+	<body><div id="app">
+		<div class="header_box">
+			<img id="header_img" src="img/header.png"/>
+		</div>
+		<div class="header_box">
+			<img id="unsel_img" src="img/unsel.png"/>
+			<img id="sel_a" class="sel_img" src="img/sel_a.png" onclick="open_tab(0)"/>
+			<img id="sel_b" class="sel_img" src="img/sel_b.png" onclick="open_tab(1)"/>
+			<img id="sel_c" class="sel_img" src="img/sel_c.png" onclick="open_tab(2)"/>
+			<img id="sel_d" class="sel_img" src="img/sel_d.png" onclick="open_tab(3)"/>
+		</div>
+		<div class="tweep_box" id="tab_a"></div>
+		<div class="tweep_box" id="tab_b"></div>
+		<div class="tweep_box" id="tab_c"></div>
+		<div class="tweep_box" id="tab_d"></div>
+	</div></body>
+</html>
