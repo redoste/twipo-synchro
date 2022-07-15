@@ -20,6 +20,8 @@ jobs:
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
     - name: Build LanguageBarrier
+      run: |
+        echo TODO
     - name: Prepare dist
       run: |
         mkdir "dist"
