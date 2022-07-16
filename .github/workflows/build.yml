@@ -31,7 +31,7 @@ jobs:
         copy "README.md" "dist/"
         copy "INSTALL.md" "dist/"
 
-        copy "target/release/twipo-synchro.exe" "dist/twipo-synchro"
+        copy "target/i686-pc-windows-msvc/release/twipo-synchro.exe" "dist/twipo-synchro"
         copy "LICENSE" "dist/twipo-synchro"
         copy "res/charset.LICENSE.md" "dist/twipo-synchro"
         copy "thirdparty.LICENSE.md" "dist/twipo-synchro"
