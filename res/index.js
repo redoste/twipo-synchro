@@ -76,14 +76,89 @@ function add_tweep(tweep) {
 	let details_div = document.createElement("div");
 	details_div.classList = "details";
 	let details_span = document.createElement("span");
-	details_span.appendChild(document.createTextNode("Today"));
+	let day_text = tweep.different_day ? "Yesterday" : "Today";
+	details_span.appendChild(document.createTextNode(day_text));
 	details_div.appendChild(details_span);
+
+	let replies_div = null;
+	if (tweep.replies.length > 0) {
+		let replies_div_id = "replies_" + tweep.id.toString().padStart(8, "0");
+		let reply_button_div_id = "reply_button_" + tweep.id.toString().padStart(8, "0");
+
+		let reply_button_div = document.createElement("div");
+		reply_button_div.classList = "details_button";
+		reply_button_div.id = reply_button_div_id;
+		reply_button_div.dataset.replies_div_id = replies_div_id;
+		reply_button_div.onclick = function() {
+			let replies_div = document.getElementById(this.dataset.replies_div_id);
+			let hidden = replies_div.style.display == "none";
+			replies_div.style.display = hidden ? "block" : "none";
+		};
+
+		let reply_button_img = document.createElement("img");
+		reply_button_img.src = "img/reply.png";
+		reply_button_div.appendChild(reply_button_img);
+
+		details_div.appendChild(reply_button_div);
+
+		replies_div = document.createElement("div");
+		replies_div.className = "replies";
+		replies_div.style.display = "none";
+		replies_div.id = replies_div_id;
+		for (let index in tweep.replies) {
+			let reply_div = document.createElement("div");
+			reply_div.classList = "reply";
+			reply_div.appendChild(format_text(tweep.replies[index]));
+
+			let reply_details_div = document.createElement("div");
+			reply_details_div.classList = "details";
+			reply_details_div.appendChild(document.createElement("span"));
+
+			let send_button_div = document.createElement("div");
+			send_button_div.classList = "details_button";
+			send_button_div.dataset.replies_div_id = replies_div_id;
+			send_button_div.dataset.reply_button_div_id = reply_button_div_id;
+			send_button_div.dataset.tweep_id = tweep.id;
+			send_button_div.dataset.reply_id = index;
+			send_button_div.onclick = function() {
+				if (send_reply(Number(this.dataset.tweep_id), Number(this.dataset.reply_id))) {
+					document.getElementById(this.dataset.replies_div_id).style.display = "none";
+					document.getElementById(this.dataset.reply_button_div_id).style.display = "none";
+				}
+			};
+
+			let send_button_img = document.createElement("img");
+			send_button_img.src = "img/send.png";
+			send_button_div.appendChild(send_button_img);
+
+			reply_details_div.appendChild(send_button_div);
+
+			reply_div.appendChild(reply_details_div);
+			replies_div.appendChild(reply_div);
+		}
+	}
 
 	tweep_div.appendChild(author_div);
 	tweep_div.appendChild(text_div);
+	if (replies_div != null) {
+		tweep_div.appendChild(replies_div);
+	}
 	tweep_div.appendChild(details_div);
 
 	document.getElementById("tab_" + TAB_NAMES[tweep.tab]).prepend(tweep_div);
+}
+
+function send_reply(tweep_id, reply_id) {
+	if (window.websocket.readyState != window.WebSocket.OPEN) {
+		return false;
+	}
+
+	window.websocket.send(JSON.stringify({
+		type: "reply",
+		tweep_id: tweep_id,
+		reply_id: reply_id,
+	}));
+	return true;
 }
 
 function clear_tweeps() {
@@ -107,6 +182,7 @@ document.addEventListener("touchend", function(e) {
 document.addEventListener('DOMContentLoaded', function() {
 	open_tab(0);
 	let websocket = new WebSocket("ws://" + location.host + "/websocket");
+	window.websocket = websocket;
 	websocket.onmessage = function(e) {
 		let message = JSON.parse(e.data);
 		if (message.type == "clear") {
@@ -118,7 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	};
 	// TODO : support idle
-	// TODO : replies
 	websocket.onclose = function(e) {
 		alert("WebSocket closed : " + e.code + " " + e.reason);
 	};
