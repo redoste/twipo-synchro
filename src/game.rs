@@ -32,7 +32,7 @@ impl Serialize for SC3Op {
 }
 
 #[derive(Serialize)]
-struct SC3String {
+pub struct SC3String {
     content: String,
     markers: Vec<SC3Op>,
 }
@@ -74,12 +74,14 @@ impl SC3String {
 
 #[derive(Serialize)]
 pub struct Tweep {
-    id: u32,
-    tab: u16,
-    pfp_id: u16,
-    author_username: SC3String,
-    author_realname: SC3String,
-    content: SC3String,
+    pub id: u32,
+    pub tab: u16,
+    pub pfp_id: u16,
+    pub different_day: bool,
+    pub author_username: SC3String,
+    pub author_realname: SC3String,
+    pub content: SC3String,
+    pub replies: Vec<SC3String>,
 }
 
 impl Tweep {
