@@ -1,3 +1,4 @@
+use async_std::io;
 use async_std::net::{SocketAddr, TcpListener, TcpStream};
 use async_std::sync::{Arc, Mutex};
 use async_std::task;
@@ -5,12 +6,13 @@ use async_std::task;
 use futures::prelude::*;
 
 use std::error::Error;
-use std::io::Error as IoError;
+use std::io::{Error as IoError, ErrorKind};
 
 use sha1::{Digest, Sha1};
 
 use async_tungstenite::tungstenite::protocol::Message;
 
+use serde::Deserialize;
 use serde_json::json;
 
 use super::game::Tweeps;
@@ -74,8 +76,53 @@ impl HttpConnection {
         self.write_streams.lock().await.push(write);
 
         while let Some(message) = read.next().await {
-            eprintln!("{} : {}", self.peer_addr, message?.to_text()?);
-            // TODO : replies
+            let valid_message = message?;
+            let message_str = valid_message.to_text()?;
+            eprintln!("{} : {}", self.peer_addr, message_str.trim());
+
+            #[derive(Deserialize)]
+            struct TweepReply {
+                r#type: String,
+                tweep_id: u32,
+                reply_id: u32,
+            }
+            let tweep_reply: TweepReply = serde_json::from_str(message_str)?;
+
+            if tweep_reply.r#type != "reply" {
+                return Err(Box::new(IoError::new(
+                    ErrorKind::InvalidData,
+                    "Invalid message type from websocket",
+                )));
+            }
+            let mut locked_tweeps = self.tweeps.lock().await;
+            let tweep = match locked_tweeps
+                .iter_mut()
+                .find(|tweep| tweep.id == tweep_reply.tweep_id)
+            {
+                Some(t) => t,
+                None => {
+                    return Err(Box::new(IoError::new(
+                        ErrorKind::InvalidData,
+                        "Invalid tweep id from tweep reply via websocket",
+                    )))
+                }
+            };
+            if tweep_reply.reply_id as usize >= tweep.replies.len() {
+                return Err(Box::new(IoError::new(
+                    ErrorKind::InvalidData,
+                    "Invalid reply id from tweep reply via websocket",
+                )));
+            }
+            tweep.replies.clear();
+
+            let message = [
+                0x594c5052_u32.to_ne_bytes(),
+                tweep_reply.tweep_id.to_ne_bytes(),
+                tweep_reply.reply_id.to_ne_bytes(),
+            ]
+            .concat();
+            io::stdout().write_all(&message).await?;
+            io::stdout().flush().await?;
         }
         eprintln!("{} : WS Closed", self.peer_addr);
         Ok(())
