@@ -92,18 +92,30 @@ impl Tweep {
         stdin.read_exact(&mut tab_buf).await?;
         let mut pfp_id_buf = [0u8; 2];
         stdin.read_exact(&mut pfp_id_buf).await?;
+        let mut different_day_buf = [0u8; 2];
+        stdin.read_exact(&mut different_day_buf).await?;
+        let mut replies_amount_buf = [0u8; 2];
+        stdin.read_exact(&mut replies_amount_buf).await?;
 
         let author_username = SC3String::read_from_stdin(stdin).await?;
         let author_realname = SC3String::read_from_stdin(stdin).await?;
         let content = SC3String::read_from_stdin(stdin).await?;
 
+        let replies_amount = u16::from_ne_bytes(replies_amount_buf);
+        let mut replies = Vec::with_capacity(replies_amount as usize);
+        for _ in 0..replies_amount {
+            replies.push(SC3String::read_from_stdin(stdin).await?);
+        }
+
         Ok(Tweep {
             id: u32::from_ne_bytes(id_buf),
             tab: u16::from_ne_bytes(tab_buf),
             pfp_id: u16::from_ne_bytes(pfp_id_buf),
+            different_day: u16::from_ne_bytes(different_day_buf) != 0,
             author_username,
             author_realname,
             content,
+            replies,
         })
     }
 }
