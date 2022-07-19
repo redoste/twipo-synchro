@@ -27,6 +27,7 @@ jobs:
       run: |
         cd LanguageBarrier
         vcpkg install minhook cereal nlohmann-json freetype directxtex --triplet=x86-windows-static-md
+        vcpkg integrate install
         msbuild /p:"Configuration=dinput8-Release;VcpkgUserTriplet=x86-windows-static-md;VcpkgUseStatic=false"
     - name: Prepare dist
       run: |
