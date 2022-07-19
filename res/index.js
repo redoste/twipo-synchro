@@ -167,6 +167,28 @@ function clear_tweeps() {
 	}
 }
 
+function connect_websocket() {
+	clear_tweeps();
+	console.log("(re)connecting to websocket");
+	let websocket = new WebSocket("ws://" + location.host + "/websocket");
+	window.websocket = websocket;
+	window.websocketfailed = false;
+	websocket.onmessage = function(e) {
+		let message = JSON.parse(e.data);
+		if (message.type == "clear") {
+			clear_tweeps();
+		} else if (message.type == "tweep") {
+			add_tweep(message.tweep);
+		} else {
+			alert("Unknown message : " + e.data);
+		}
+	};
+	websocket.onclose = function(e) {
+		alert("WebSocket closed : " + e.code + " " + e.reason + "\n" + "You can refresh the page to reconnect.");
+		window.websocketfailed = true;
+	};
+}
+
 let touch_start = 0;
 document.addEventListener("touchstart", function(e) {
 	touch_start = e.changedTouches[0].screenX;
@@ -181,23 +203,17 @@ document.addEventListener("touchend", function(e) {
 
 document.addEventListener('DOMContentLoaded', function() {
 	open_tab(0);
-	let websocket = new WebSocket("ws://" + location.host + "/websocket");
-	window.websocket = websocket;
-	websocket.onmessage = function(e) {
-		let message = JSON.parse(e.data);
-		if (message.type == "clear") {
-			clear_tweeps();
-		} else if (message.type == "tweep") {
-			add_tweep(message.tweep);
-		} else {
-			alert("Unknown message : " + e.data);
+	connect_websocket();
+
+	setInterval(function() {
+		if (window.websocket.readyState != window.WebSocket.OPEN && !window.websocketfailed) {
+			// We make sure the old websocket does not interfere with the new one
+			window.websocket.onmessage = null;
+			window.websocket.onclose = null;
+			window.websocket.close();
+			window.websocket = null;
+
+			connect_websocket();
 		}
-	};
-	// TODO : support idle
-	websocket.onclose = function(e) {
-		alert("WebSocket closed : " + e.code + " " + e.reason);
-	};
-	websocket.onerror = function(e) {
-		alert("WebSocket error !");
-	};
+	}, 500);
 });
