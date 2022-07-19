@@ -10,6 +10,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
     - name: Install cargo-about
       run: |
         cargo install cargo-about
@@ -21,7 +23,9 @@ jobs:
         cargo about generate about.hbs > thirdparty.LICENSE.md
     - name: Build LanguageBarrier
       run: |
-        echo TODO
+        cd LanguageBarrier
+        vcpkg install minhook cereal nlohmann-json freetype directxtex --triplet=x86-windows-static-md
+        msbuild /p:"Configuration=dinput8-Release;VcpkgUserTriplet=x86-windows-static-md;VcpkgUseStatic=false"
     - name: Prepare dist
       run: |
         mkdir "dist"
@@ -35,6 +39,10 @@ jobs:
         copy "LICENSE" "dist/twipo-synchro"
         copy "res/charset.LICENSE.md" "dist/twipo-synchro"
         copy "thirdparty.LICENSE.md" "dist/twipo-synchro"
+
+        copy "LanguageBarrier/dinput8-Release/dinput8.dll" "dist/NOTES ELITE"
+        copy "LanguageBarrier/LanguageBarrier/LICENSE" "dist/NOTES ELITE"
+        copy "LanguageBarrier/LanguageBarrier/THIRDPARTY.LB.txt" "dist/NOTES ELITE"
     - name: Create dist zip
       run: |
         Compress-Archive -Path dist\* -DestinationPath dist.zip
