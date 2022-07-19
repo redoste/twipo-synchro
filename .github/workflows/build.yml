@@ -21,6 +21,8 @@ jobs:
     - name: Generate third party license file for the server
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
     - name: Build LanguageBarrier
       run: |
         cd LanguageBarrier
