@@ -20,3 +20,11 @@ tungstenite = "0.17"
 strip = true
 opt-level = "z"
 lto = true
+
+[[bin]]
+name = "twipo-synchro"
+path = "src/main.rs"
+
+[[bin]]
+name = "installer"
+path = "src/installer.rs"
