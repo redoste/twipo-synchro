@@ -33,7 +33,7 @@ async fn async_main() -> Result<(), IoError> {
     };
 
     let listener = TcpListener::bind(&listen_address).await?;
-    eprintln!("WebSocket server listening on {}", &listen_address);
+    eprintln!("**** Start apprication on {} ****", &listen_address);
 
     let write_streams: http::WriteStreams = Arc::new(Mutex::new(Vec::new()));
     let tweeps: game::Tweeps = Arc::new(Mutex::new(Vec::new()));
