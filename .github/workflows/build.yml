@@ -17,10 +17,17 @@ jobs:
         cargo install cargo-about
     - name: Build server
       run: |
-        cargo build --release --target i686-pc-windows-msvc
+        cargo build --release --target i686-pc-windows-msvc --bin twipo-synchro
     - name: Generate third party license file for the server
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
+    - name: Install Linux target
+      run: |
+        rustup target add i686-unknown-linux-gnu
+    - name: Build installers for Windows and Linux
+      run: |
+        cargo build --release --target i686-unknown-linux-gnu --bin installer
+        cargo build --release --target i686-pc-windows-msvc --bin installer
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
     - name: Build LanguageBarrier
@@ -35,6 +42,8 @@ jobs:
         mkdir "dist/twipo-synchro"
         mkdir "dist/NOTES ELITE"
 
+        copy "target/i686-pc-windows-msvc/release/installer.exe" "dist/installer-win.exe"
+        copy "target/i686-unknown-linux-gnu/release/installer" "dist/installer-linux"
         copy "README.md" "dist/"
         copy "INSTALL.md" "dist/"
 
