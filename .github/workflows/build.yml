@@ -83,7 +83,6 @@ jobs:
         path: ./LanguageBarrier/dinput8-Release/dinput8.dll
   build-server:
     runs-on: windows-latest
-    needs: [build-installer-win, build-installer-linux, build-lb]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -97,15 +96,44 @@ jobs:
           ~/.cargo/git/db/
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: Install cargo-about
-      run: |
-        cargo install cargo-about
     - name: Build server
       run: |
         cargo build --release --target i686-pc-windows-msvc --bin twipo-synchro
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: server-${{ github.sha }}
+        path: ./target/i686-pc-windows-msvc/release/twipo-synchro.exe
+  generate-about:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-about
+    - name: Install cargo-about
+      run: |
+        cargo install cargo-about
     - name: Generate third party license file for the server
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: about-${{ github.sha }}
+        path: ./thirdparty.LICENSE.md
+  pack-dist:
+    runs-on: windows-latest
+    needs: [build-installer-win, build-installer-linux, build-lb, build-server, generate-about]
+    steps:
     - name: Download artifacts
       uses: actions/download-artifact@v3
     - name: Prepare dist
@@ -119,10 +147,10 @@ jobs:
         copy "README.md" "dist/"
         copy "INSTALL.md" "dist/"
 
-        copy "target/i686-pc-windows-msvc/release/twipo-synchro.exe" "dist/twipo-synchro"
+        copy "server-${{ github.sha }}/twipo-synchro.exe" "dist/twipo-synchro"
         copy "LICENSE" "dist/twipo-synchro"
         copy "res/charset.LICENSE.md" "dist/twipo-synchro"
-        copy "thirdparty.LICENSE.md" "dist/twipo-synchro"
+        copy "about-${{ github.sha }}/thirdparty.LICENSE.md" "dist/twipo-synchro"
 
         copy "lb-${{ github.sha }}/dinput8.dll" "dist/NOTES ELITE"
         copy "LanguageBarrier/LanguageBarrier/LICENSE" "dist/NOTES ELITE"
