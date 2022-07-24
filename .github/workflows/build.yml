@@ -120,6 +120,7 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-about
     - name: Install cargo-about
+      continue-on-error: true
       run: |
         cargo install cargo-about
     - name: Generate third party license file for the server
