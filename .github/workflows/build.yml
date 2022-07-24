@@ -6,12 +6,95 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-installer-win:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: recursive
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Build installer
+      run: |
+        cargo build --release --target i686-pc-windows-msvc --bin installer
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: installer-windows-${{ github.sha }}
+        path: ./target/i686-pc-windows-msvc/release/installer.exe
+  build-installer-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Install i686 target
+      run: |
+        rustup target add i686-unknown-linux-gnu
+    - name: Build installer
+      run: |
+        cargo build --release --target i686-unknown-linux-gnu --bin installer
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: installer-linux-${{ github.sha }}
+        path: ./target/i686-unknown-linux-gnu/release/installer
+  build-lb:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.LOCALAPPDATA }}/vcpkg/archives
+          ${{ env.APPDATA }}/vcpkg/archives
+        key: ${{ runner.os }}-vcpkg
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build LanguageBarrier
+      run: |
+        cd LanguageBarrier
+        vcpkg install minhook cereal nlohmann-json freetype directxtex --triplet=x86-windows-static-md
+        vcpkg integrate install
+        msbuild /p:"Configuration=dinput8-Release;VcpkgUserTriplet=x86-windows-static-md;VcpkgUseStatic=false"
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: lb-${{ github.sha }}
+        path: ./LanguageBarrier/dinput8-Release/dinput8.dll
+  build-server:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Install cargo-about
       run: |
         cargo install cargo-about
@@ -21,29 +104,16 @@ jobs:
     - name: Generate third party license file for the server
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
-    - name: Install Linux target
-      run: |
-        rustup target add i686-unknown-linux-gnu
-    - name: Build installers for Windows and Linux
-      run: |
-        cargo build --release --target i686-unknown-linux-gnu --bin installer
-        cargo build --release --target i686-pc-windows-msvc --bin installer
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
-    - name: Build LanguageBarrier
-      run: |
-        cd LanguageBarrier
-        vcpkg install minhook cereal nlohmann-json freetype directxtex --triplet=x86-windows-static-md
-        vcpkg integrate install
-        msbuild /p:"Configuration=dinput8-Release;VcpkgUserTriplet=x86-windows-static-md;VcpkgUseStatic=false"
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
     - name: Prepare dist
       run: |
         mkdir "dist"
         mkdir "dist/twipo-synchro"
         mkdir "dist/NOTES ELITE"
 
-        copy "target/i686-pc-windows-msvc/release/installer.exe" "dist/installer-win.exe"
-        copy "target/i686-unknown-linux-gnu/release/installer" "dist/installer-linux"
+        copy "installer-windows-${{ github.sha }}/installer.exe" "dist/installer-win.exe"
+        copy "installer-linux-${{ github.sha }}/installer" "dist/installer-linux"
         copy "README.md" "dist/"
         copy "INSTALL.md" "dist/"
 
@@ -52,7 +122,7 @@ jobs:
         copy "res/charset.LICENSE.md" "dist/twipo-synchro"
         copy "thirdparty.LICENSE.md" "dist/twipo-synchro"
 
-        copy "LanguageBarrier/dinput8-Release/dinput8.dll" "dist/NOTES ELITE"
+        copy "lb-${{ github.sha }}/dinput8.dll" "dist/NOTES ELITE"
         copy "LanguageBarrier/LanguageBarrier/LICENSE" "dist/NOTES ELITE"
         copy "LanguageBarrier/LanguageBarrier/THIRDPARTY.LB.txt" "dist/NOTES ELITE"
     - name: Create dist zip
