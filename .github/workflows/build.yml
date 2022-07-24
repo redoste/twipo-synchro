@@ -65,8 +65,8 @@ jobs:
     - uses: actions/cache@v3
       with:
         path: |
-          ${{ env.LOCALAPPDATA }}/vcpkg/archives
-          ${{ env.APPDATA }}/vcpkg/archives
+          ~/AppData/Roaming/vcpkg/archives
+          ~/AppData/Local/vcpkg/archives
         key: ${{ runner.os }}-vcpkg
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
