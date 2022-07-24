@@ -106,7 +106,7 @@ Press enter without providing any folder if the detected one is correct.
 
     let dll_path = game_path.join("NOTES ELITE");
     let dinput_path = dll_path.join("dinput8.dll");
-    let _dinput_backup_path = dll_path.join("dinput8_coz.dll");
+    let dinput_backup_path = dll_path.join("dinput8_coz.dll");
     for path in [
         &patchdef_path,
         &gamedef_path,
@@ -190,8 +190,19 @@ Press enter without providing any folder if the detected one is correct.
         let mut version_file = fs::File::create(version_path).unwrap();
         version_file.write_all(VERSION_STRING).unwrap();
     }
-    // println!("STEP 4 : Copying twipo-synchro LanguageBarrier...");
-    // TODO : backup & copy LB dll
+
+    println!(
+        "STEP 4 : Backing up old LanguageBarrier and copying twipo-synchro LanguageBarrier..."
+    );
+    {
+        if dinput_backup_path.is_file() {
+            println!("WARN : LanguageBarrier backup already present, skiping");
+        } else {
+            fs::copy(&dinput_path, dinput_backup_path).unwrap();
+        }
+        fs::copy(installer_dinput_path, dinput_path).unwrap();
+    }
+
     println!("The instalation of twipo-synchro was successful !");
     read();
 }
