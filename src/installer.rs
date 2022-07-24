@@ -58,7 +58,7 @@ Game Directory
 
 Please provide the location of your ROBOTICS;NOTES ELITE installation.
 This is folder that Steam's point to when you select the "Browse local file"
-option in the right click menu in your library.
+option in the properties window in your library.
 
 On Windows you can drag-and-drop the folder in the command line window.
 Press enter without providing any folder if the detected one is correct.
