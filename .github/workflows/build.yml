@@ -46,6 +46,7 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Install i686 target
       run: |
+        sudo apt-get install gcc-multilib
         rustup target add i686-unknown-linux-gnu
     - name: Build installer
       run: |
