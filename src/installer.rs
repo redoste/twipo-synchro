@@ -71,8 +71,8 @@ Did you read and accept the terms and conditions [y/N] : "#
     let default_folder = "TODO".to_string();
     print!(
         r#"
-Game Directory
-==============
+Game Directory :
+================
 
 Please provide the location of your ROBOTICS;NOTES ELITE installation.
 This is folder that Steam's point to when you select the "Browse local file"
