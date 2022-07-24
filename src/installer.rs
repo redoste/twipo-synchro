@@ -12,6 +12,7 @@ use std::path::Path;
 const EXPECTED_VERSION: &str = "1.0.8";
 const CONFIG_KEY: &str = "twipoSynchroListenAddress";
 const CONFIG_VALUE: &str = "0.0.0.0:8080";
+const VERSION_STRING: &[u8] = b"0.1.0\n";
 
 fn flush() {
     std::io::stdout().flush().unwrap();
@@ -27,6 +28,23 @@ fn read_json(path: &Path) -> serde_json::Value {
 }
 
 fn main() {
+    let installer_exe_path = std::env::current_exe().unwrap();
+    let installer_path = installer_exe_path.parent().unwrap();
+    let installer_dinput_path = installer_path.join("NOTES ELITE").join("dinput8.dll");
+    let installer_server_path = installer_path
+        .join("twipo-synchro")
+        .join("twipo-synchro.exe");
+    for path in [&installer_dinput_path, &installer_server_path].iter() {
+        if !path.is_file() {
+            println!(
+                "Unable to find {}, make sure you extracted the installation archive.",
+                path.to_str().unwrap()
+            );
+            read();
+            return;
+        }
+    }
+
     print!(
         r#"twipo-synchro installer
 =======================
@@ -155,8 +173,23 @@ Press enter without providing any folder if the detected one is correct.
         println!("{}", serde_json::to_string_pretty(&config_json).unwrap());
     }
 
-    // println!("STEP 3 : Copying twipo-synchro server...");
-    // TODO : copy twipo-synchro/ folder (and add version ?)
+    println!("STEP 3 : Copying twipo-synchro server...");
+    {
+        let twipo_synchro_path = game_path.join("twipo-synchro");
+        if !twipo_synchro_path.is_dir() {
+            fs::create_dir(&twipo_synchro_path).unwrap();
+        }
+
+        let server_path = twipo_synchro_path.join("twipo-synchro.exe");
+        if server_path.is_file() {
+            println!("WARN : twipo-synchro server already present, overwriting");
+        }
+        fs::copy(installer_server_path, server_path).unwrap();
+
+        let version_path = twipo_synchro_path.join("version.txt");
+        let mut version_file = fs::File::create(version_path).unwrap();
+        version_file.write_all(VERSION_STRING).unwrap();
+    }
     // println!("STEP 4 : Copying twipo-synchro LanguageBarrier...");
     // TODO : backup & copy LB dll
     println!("The instalation of twipo-synchro was successful !");
