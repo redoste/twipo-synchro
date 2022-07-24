@@ -134,6 +134,9 @@ jobs:
     runs-on: windows-latest
     needs: [build-installer-win, build-installer-linux, build-lb, build-server, generate-about]
     steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
     - name: Download artifacts
       uses: actions/download-artifact@v3
     - name: Prepare dist
