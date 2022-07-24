@@ -83,6 +83,7 @@ jobs:
         path: ./LanguageBarrier/dinput8-Release/dinput8.dll
   build-server:
     runs-on: windows-latest
+    needs: [build-installer-win, build-installer-linux, build-lb]
     steps:
     - uses: actions/checkout@v2
       with:
