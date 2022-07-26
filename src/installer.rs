@@ -27,6 +27,12 @@ fn read_json(path: &Path) -> serde_json::Value {
     serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
 }
 
+fn save_json(path: &Path, value: &serde_json::Value) {
+    let mut file = fs::File::create(path).unwrap();
+    let value_json = serde_json::to_string_pretty(value).unwrap();
+    file.write_all(value_json.as_bytes()).unwrap();
+}
+
 fn main() {
     let installer_exe_path = std::env::current_exe().unwrap();
     let installer_path = installer_exe_path.parent().unwrap();
@@ -153,8 +159,7 @@ Press enter without providing any folder if the detected one is correct.
             }
             signatures.insert(key.clone(), value.clone());
         }
-        // TODO : save
-        println!("{}", serde_json::to_string_pretty(&gamedef).unwrap());
+        save_json(&gamedef_path, &gamedef);
     }
 
     println!("STEP 2 : Adding twipo-synchro config...");
@@ -169,8 +174,7 @@ Press enter without providing any folder if the detected one is correct.
                 serde_json::Value::String(CONFIG_VALUE.to_string()),
             );
         }
-        // TODO : save
-        println!("{}", serde_json::to_string_pretty(&config_json).unwrap());
+        save_json(&defaultconfig_path, &config_json);
     }
 
     println!("STEP 3 : Copying twipo-synchro server...");
