@@ -23,6 +23,12 @@ fn read() -> String {
     io::stdin().lock().lines().next().unwrap().unwrap()
 }
 
+fn pause() {
+    if cfg!(windows) {
+        read();
+    }
+}
+
 fn read_json(path: &Path) -> serde_json::Value {
     serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
 }
@@ -46,7 +52,7 @@ fn main() {
                 "Unable to find {}, make sure you extracted the installation archive.",
                 path.to_str().unwrap()
             );
-            read();
+            pause();
             return;
         }
     }
@@ -70,7 +76,7 @@ Did you read and accept the terms and conditions [y/N] : "#
     let license_ans = read();
     if license_ans.trim().to_lowercase() != "y" {
         println!("You need to accept the licenses to continue");
-        read();
+        pause();
         return;
     }
 
@@ -101,7 +107,7 @@ Press enter without providing any folder if the detected one is correct.
     let game_path = Path::new(&folder_str);
     if !game_path.is_absolute() {
         println!("Please enter an absolute path");
-        read();
+        pause();
         return;
     }
 
@@ -123,7 +129,7 @@ Press enter without providing any folder if the detected one is correct.
     {
         if !path.is_file() {
             println!("Unable to find {}, make sure you installed the Committee of Zero ROBOTICS;NOTES ELITE Steam Patch.", path.to_str().unwrap());
-            read();
+            pause();
             return;
         }
     }
@@ -208,5 +214,5 @@ Press enter without providing any folder if the detected one is correct.
     }
 
     println!("The instalation of twipo-synchro was successful !");
-    read();
+    pause();
 }
