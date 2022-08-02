@@ -58,7 +58,11 @@ impl SC3String {
                     let codepoint: usize =
                         (((token[0] as usize) << 8) | (char_lower_half[0] as usize)) - 0x8000;
                     if let Some(character) = SC3String::CHARSET.chars().nth(codepoint) {
-                        content.push(character);
+                        if character == '\u{3000}' {
+                            content.push(' ');
+                        } else {
+                            content.push(character);
+                        }
                     } else {
                         return Err(IoError::new(ErrorKind::InvalidData, "Unknown codepoint"));
                     }
