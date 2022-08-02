@@ -117,13 +117,11 @@ function add_tweep(tweep) {
 			let send_button_div = document.createElement("div");
 			send_button_div.classList = "details_button";
 			send_button_div.dataset.replies_div_id = replies_div_id;
-			send_button_div.dataset.reply_button_div_id = reply_button_div_id;
 			send_button_div.dataset.tweep_id = tweep.id;
 			send_button_div.dataset.reply_id = index;
 			send_button_div.onclick = function() {
 				if (send_reply(Number(this.dataset.tweep_id), Number(this.dataset.reply_id))) {
 					document.getElementById(this.dataset.replies_div_id).style.display = "none";
-					document.getElementById(this.dataset.reply_button_div_id).style.display = "none";
 				}
 			};
 
@@ -135,6 +133,10 @@ function add_tweep(tweep) {
 
 			reply_div.appendChild(reply_details_div);
 			replies_div.appendChild(reply_div);
+		}
+
+		if (!tweep.reply_possible) {
+			reply_button_div.style.display = "none";
 		}
 	}
 
@@ -167,6 +169,17 @@ function clear_tweeps() {
 	}
 }
 
+function set_reply_possible(tweep_id, possible) {
+	let reply_button_div_id = "reply_button_" + tweep_id.toString().padStart(8, "0");
+	let replies_div_id = "replies_" + tweep_id.toString().padStart(8, "0");
+
+	let reply_button_div = document.getElementById(reply_button_div_id);
+	let replies_div = document.getElementById(replies_div_id);
+
+	if (replies_div != null && !possible) { replies_div.style.display = "none"; }
+	if (reply_button_div != null) { reply_button_div.style.display = possible ? "block" : "none"; }
+}
+
 function connect_websocket() {
 	clear_tweeps();
 	console.log("(re)connecting to websocket");
@@ -179,6 +192,8 @@ function connect_websocket() {
 			clear_tweeps();
 		} else if (message.type == "tweep") {
 			add_tweep(message.tweep);
+		} else if (message.type == "set_reply_possible") {
+			set_reply_possible(message.tweep_id, message.possible);
 		} else {
 			alert("Unknown message : " + e.data);
 		}
