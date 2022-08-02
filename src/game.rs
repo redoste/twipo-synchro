@@ -162,12 +162,9 @@ pub async fn read_stdin(
                 let mut locked_tweeps = tweeps.lock().await;
                 let tweep = match locked_tweeps.iter_mut().find(|tweep| tweep.id == id) {
                     Some(t) => t,
-                    None => {
-                        return Err(IoError::new(
-                            ErrorKind::InvalidData,
-                            "Invalid tweep id in STRP message from game",
-                        ))
-                    }
+                    // The game may send STRP messages for tweeps we don't know about (e.g. during
+                    // game init where it will go through all tweeps), so we'll ignore them.
+                    None => continue,
                 };
                 tweep.reply_possible = possible;
 
