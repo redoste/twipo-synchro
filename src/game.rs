@@ -86,6 +86,7 @@ pub struct Tweep {
     pub author_realname: SC3String,
     pub content: SC3String,
     pub replies: Vec<SC3String>,
+    pub reply_possible: bool,
 }
 
 impl Tweep {
@@ -120,6 +121,7 @@ impl Tweep {
             author_realname,
             content,
             replies,
+            reply_possible: false,
         })
     }
 }
@@ -147,6 +149,34 @@ pub async fn read_stdin(
                 let tweep_as_json = json!({"type": "tweep", "tweep": tweep}).to_string();
                 tweeps.lock().await.push(tweep);
                 tweep_as_json
+            }
+            0x53545250 => {
+                // "STRP" : Set Reply Possible
+                let mut id_buf = [0u8; 4];
+                stdin.read_exact(&mut id_buf).await?;
+                let id = u32::from_ne_bytes(id_buf);
+                let mut possible_buf = [0u8; 2];
+                stdin.read_exact(&mut possible_buf).await?;
+                let possible = u16::from_ne_bytes(possible_buf) != 0;
+
+                let mut locked_tweeps = tweeps.lock().await;
+                let tweep = match locked_tweeps.iter_mut().find(|tweep| tweep.id == id) {
+                    Some(t) => t,
+                    None => {
+                        return Err(IoError::new(
+                            ErrorKind::InvalidData,
+                            "Invalid tweep id in STRP message from game",
+                        ))
+                    }
+                };
+                tweep.reply_possible = possible;
+
+                json!({
+                       "type": "set_reply_possible",
+                       "tweep_id": id,
+                       "possible": possible,
+                })
+                .to_string()
             }
             _ => {
                 panic!("Unknown message type from game : possible desync !");

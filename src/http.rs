@@ -94,9 +94,9 @@ impl HttpConnection {
                     "Invalid message type from websocket",
                 )));
             }
-            let mut locked_tweeps = self.tweeps.lock().await;
+            let locked_tweeps = self.tweeps.lock().await;
             let tweep = match locked_tweeps
-                .iter_mut()
+                .iter()
                 .find(|tweep| tweep.id == tweep_reply.tweep_id)
             {
                 Some(t) => t,
@@ -113,7 +113,6 @@ impl HttpConnection {
                     "Invalid reply id from tweep reply via websocket",
                 )));
             }
-            tweep.replies.clear();
 
             let message = [
                 0x594c5052_u32.to_ne_bytes(),
