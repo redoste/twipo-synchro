@@ -7,7 +7,7 @@
 
 use std::fs;
 use std::io::{self, BufRead, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const EXPECTED_VERSION: &str = "1.0.8";
 const CONFIG_KEY: &str = "twipoSynchroListenAddress";
@@ -37,6 +37,66 @@ fn save_json(path: &Path, value: &serde_json::Value) {
     let mut file = fs::File::create(path).unwrap();
     let value_json = serde_json::to_string_pretty(value).unwrap();
     file.write_all(value_json.as_bytes()).unwrap();
+}
+
+#[cfg(target_os = "windows")]
+fn get_steam_path() -> Option<PathBuf> {
+    let hkcu = winreg::RegKey::predef(winreg::enums::HKEY_CURRENT_USER);
+    let steam_key = hkcu.open_subkey("Software\\Valve\\Steam").ok()?;
+    let steam_path: String = steam_key.get_value("SteamPath").ok()?;
+    Some(Path::new(&steam_path).to_path_buf())
+}
+
+#[cfg(target_os = "linux")]
+fn get_steam_path() -> Option<PathBuf> {
+    let home = std::env::var("HOME").ok()?;
+    Some(Path::new(&home).join(".steam").join("root"))
+}
+
+/* The parsing is very ugly but I don't want to do something too complex.
+ * If we fail because of weird chars in the library path, just let the user
+ * specify the folder manually.
+ */
+fn get_steam_libraryfolders() -> Option<Vec<PathBuf>> {
+    let steam_path = get_steam_path()?;
+    let vdf_path = &["SteamApps", "steamapps"].iter().find_map(|case| {
+        let possible_path = steam_path.join(case).join("libraryfolders.vdf");
+        if possible_path.is_file() {
+            Some(possible_path)
+        } else {
+            None
+        }
+    })?;
+    let vdf_content = fs::read_to_string(vdf_path).ok()?;
+    let mut output: Vec<PathBuf> = Vec::new();
+    for line in vdf_content.lines() {
+        if line.contains("\"path\"") {
+            if let Some(s) = line.split('\"').nth(3) {
+                let path = Path::new(s);
+                if path.is_dir() {
+                    output.push(path.to_path_buf())
+                }
+            }
+        }
+    }
+    Some(output)
+}
+
+fn get_game_path() -> Option<PathBuf> {
+    if let Some(library_paths) = get_steam_libraryfolders() {
+        for library_path in library_paths.iter() {
+            for case in &["SteamApps", "steamapps"] {
+                let game_path = library_path
+                    .join(case)
+                    .join("common")
+                    .join("ROBOTICS;NOTES ELITE");
+                if game_path.is_dir() {
+                    return Some(game_path);
+                }
+            }
+        }
+    }
+    None
 }
 
 fn main() {
@@ -80,7 +140,7 @@ Did you read and accept the terms and conditions [y/N] : "#
         return;
     }
 
-    let default_folder = "TODO".to_string();
+    let default_folder = get_game_path();
     print!(
         r#"
 Game Directory :
@@ -98,16 +158,28 @@ option in the properties window in your library.
     }
     println!("Press enter without providing any folder if the detected one is correct.");
 
-    print!("\n[{}] : ", default_folder);
+    print!(
+        "\n[{}] : ",
+        match default_folder {
+            Some(ref p) => p.to_str().unwrap(),
+            None => "",
+        }
+    );
     flush();
 
     let folder_ans = read();
-    let folder_str = match folder_ans.trim() {
-        "" => default_folder,
-        f => f.trim().to_string(),
-    };
 
-    let game_path = Path::new(&folder_str);
+    let game_path = match folder_ans.trim() {
+        "" => match default_folder {
+            Some(p) => p,
+            None => {
+                println!("Please specify a path");
+                pause();
+                return;
+            }
+        },
+        f => Path::new(f.trim()).to_path_buf(),
+    };
     if !game_path.is_absolute() {
         println!("Please enter an absolute path");
         pause();
