@@ -1,0 +1,5 @@
+[target.'cfg(windows)']
+rustflags = [
+	"-C", "link-arg=/MANIFESTINPUT:manifest.xml",
+	"-C", "link-arg=/MANIFEST:EMBED",
+]
