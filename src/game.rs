@@ -1,5 +1,5 @@
 use async_std::io;
-use async_std::sync::{Arc, Mutex};
+use async_std::sync::{Arc, Mutex, RwLock};
 
 use futures::prelude::*;
 
@@ -79,9 +79,9 @@ impl SC3String {
 #[derive(Serialize)]
 pub struct Tweep {
     pub id: u32,
-    pub tab: u16,
+    pub tab: u8,
     pub pfp_id: u16,
-    pub different_day: bool,
+    pub post_date: u32,
     pub author_username: SC3String,
     pub author_realname: SC3String,
     pub content: SC3String,
@@ -93,20 +93,20 @@ impl Tweep {
     async fn read_from_stdin(stdin: &mut io::Stdin) -> Result<Tweep, IoError> {
         let mut id_buf = [0u8; 4];
         stdin.read_exact(&mut id_buf).await?;
-        let mut tab_buf = [0u8; 2];
+        let mut tab_buf = [0u8; 1];
         stdin.read_exact(&mut tab_buf).await?;
+        let mut replies_amount_buf = [0u8; 1];
+        stdin.read_exact(&mut replies_amount_buf).await?;
         let mut pfp_id_buf = [0u8; 2];
         stdin.read_exact(&mut pfp_id_buf).await?;
-        let mut different_day_buf = [0u8; 2];
-        stdin.read_exact(&mut different_day_buf).await?;
-        let mut replies_amount_buf = [0u8; 2];
-        stdin.read_exact(&mut replies_amount_buf).await?;
+        let mut post_date_buf = [0u8; 4];
+        stdin.read_exact(&mut post_date_buf).await?;
 
         let author_username = SC3String::read_from_stdin(stdin).await?;
         let author_realname = SC3String::read_from_stdin(stdin).await?;
         let content = SC3String::read_from_stdin(stdin).await?;
 
-        let replies_amount = u16::from_ne_bytes(replies_amount_buf);
+        let replies_amount = replies_amount_buf[0];
         let mut replies = Vec::with_capacity(replies_amount as usize);
         for _ in 0..replies_amount {
             replies.push(SC3String::read_from_stdin(stdin).await?);
@@ -114,9 +114,9 @@ impl Tweep {
 
         Ok(Tweep {
             id: u32::from_ne_bytes(id_buf),
-            tab: u16::from_ne_bytes(tab_buf),
+            tab: tab_buf[0],
             pfp_id: u16::from_ne_bytes(pfp_id_buf),
-            different_day: u16::from_ne_bytes(different_day_buf) != 0,
+            post_date: u32::from_ne_bytes(post_date_buf),
             author_username,
             author_realname,
             content,
@@ -127,10 +127,12 @@ impl Tweep {
 }
 
 pub type Tweeps = Arc<Mutex<Vec<Tweep>>>;
+pub type Date = Arc<RwLock<u32>>;
 
 pub async fn read_stdin(
     write_streams: super::http::WriteStreams,
     tweeps: Tweeps,
+    date: Date,
 ) -> Result<(), IoError> {
     let mut stdin = io::stdin();
 
@@ -174,6 +176,15 @@ pub async fn read_stdin(
                        "possible": possible,
                 })
                 .to_string()
+            }
+            0x44415445 => {
+                // "DATE": New date
+                let mut new_date_buf = [0u8; 4];
+                stdin.read_exact(&mut new_date_buf).await?;
+                let new_date = u32::from_ne_bytes(new_date_buf);
+
+                *(date.write().await) = new_date;
+                json!({"type": "date", "date": new_date}).to_string()
             }
             _ => {
                 panic!("Unknown message type from game : possible desync !");

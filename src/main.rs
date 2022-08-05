@@ -1,5 +1,5 @@
 use async_std::net::TcpListener;
-use async_std::sync::{Arc, Mutex};
+use async_std::sync::{Arc, Mutex, RwLock};
 use async_std::task;
 
 use futures::prelude::*;
@@ -37,10 +37,17 @@ async fn async_main() -> Result<(), IoError> {
 
     let write_streams: http::WriteStreams = Arc::new(Mutex::new(Vec::new()));
     let tweeps: game::Tweeps = Arc::new(Mutex::new(Vec::new()));
+    let date: game::Date = Arc::new(RwLock::new(0));
 
     futures::select!(
-        _ = http::accept_connections(listener, write_streams.clone(), tweeps.clone(), Arc::new(image_list)).fuse() => Ok(()),
-        e = game::read_stdin(write_streams.clone(), tweeps.clone()).fuse() => e,
+        _ = http::accept_connections(listener,
+                                     write_streams.clone(),
+                                     tweeps.clone(),
+                                     date.clone(),
+                                     Arc::new(image_list)).fuse() => Ok(()),
+        e = game::read_stdin(write_streams.clone(),
+                             tweeps.clone(),
+                             date.clone()).fuse() => e,
     )
 }
 

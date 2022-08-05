@@ -52,6 +52,8 @@ function format_text(input_text) {
 	return output;
 }
 
+const DAY_TEXTS = ["Yesterday", "Today"];
+
 function add_tweep(tweep) {
 	let tweep_div = document.createElement("div");
 	tweep_div.classList = "tweep";
@@ -76,8 +78,10 @@ function add_tweep(tweep) {
 	let details_div = document.createElement("div");
 	details_div.classList = "details";
 	let details_span = document.createElement("span");
-	let day_text = tweep.different_day ? "Yesterday" : "Today";
-	details_span.appendChild(document.createTextNode(day_text));
+	let posted_today = tweep.post_date == window.game_date;
+	details_span.innerText = DAY_TEXTS[Number(posted_today)];
+	details_span.classList = "details_date"
+	details_span.dataset.date = tweep.post_date;
 	details_div.appendChild(details_span);
 
 	let replies_div = null;
@@ -180,6 +184,14 @@ function set_reply_possible(tweep_id, possible) {
 	if (reply_button_div != null) { reply_button_div.style.display = possible ? "block" : "none"; }
 }
 
+function update_date() {
+	let spans = document.getElementsByClassName("details_date");
+	for (let i = 0; i < spans.length; i++) {
+		let today = Number(spans[i].dataset.date) == window.game_date;
+		spans[i].innerText = DAY_TEXTS[Number(today)];
+	}
+}
+
 function connect_websocket() {
 	clear_tweeps();
 	console.log("(re)connecting to websocket");
@@ -194,6 +206,9 @@ function connect_websocket() {
 			add_tweep(message.tweep);
 		} else if (message.type == "set_reply_possible") {
 			set_reply_possible(message.tweep_id, message.possible);
+		} else if (message.type == "date") {
+			window.game_date = message.date;
+			update_date();
 		} else {
 			alert("Unknown message : " + e.data);
 		}

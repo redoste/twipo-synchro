@@ -15,7 +15,7 @@ use async_tungstenite::tungstenite::protocol::Message;
 use serde::Deserialize;
 use serde_json::json;
 
-use super::game::Tweeps;
+use super::game::{Date, Tweeps};
 use super::images::ImageList;
 
 struct HttpError {
@@ -40,6 +40,7 @@ struct HttpConnection {
     peer_addr: SocketAddr,
     write_streams: WriteStreams,
     tweeps: Tweeps,
+    date: Date,
     image_list: Arc<ImageList>,
 }
 
@@ -49,6 +50,7 @@ impl HttpConnection {
         peer_addr: SocketAddr,
         write_streams: WriteStreams,
         tweeps: Tweeps,
+        date: Date,
         image_list: Arc<ImageList>,
     ) -> HttpConnection {
         HttpConnection {
@@ -56,6 +58,7 @@ impl HttpConnection {
             peer_addr,
             write_streams,
             tweeps,
+            date,
             image_list,
         }
     }
@@ -69,6 +72,13 @@ impl HttpConnection {
         )
         .await;
         let (mut write, mut read) = ws_stream.split();
+
+        let date_as_json = json!({
+            "type": "date",
+            "date": *self.date.read().await,
+        })
+        .to_string();
+        write.send(Message::text(date_as_json)).await?;
         for tweep in self.tweeps.lock().await.iter() {
             let tweep_as_json = json!({"type": "tweep", "tweep": tweep}).to_string();
             write.send(Message::text(tweep_as_json)).await?;
@@ -338,11 +348,13 @@ pub async fn accept_connections(
     listener: TcpListener,
     write_streams: WriteStreams,
     tweeps: Tweeps,
+    date: Date,
     image_list: Arc<ImageList>,
 ) {
     while let Ok((stream, peer_addr)) = listener.accept().await {
         let write_streams_clone = write_streams.clone();
         let tweeps_clone = tweeps.clone();
+        let date_clone = date.clone();
         let image_list_clone = image_list.clone();
         task::spawn(async move {
             let connection = HttpConnection::new(
@@ -350,6 +362,7 @@ pub async fn accept_connections(
                 peer_addr,
                 write_streams_clone,
                 tweeps_clone,
+                date_clone,
                 image_list_clone,
             );
             if let Err(error) = connection.handle_connection().await {
