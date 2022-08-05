@@ -161,12 +161,13 @@ jobs:
         copy "LanguageBarrier/LanguageBarrier/THIRDPARTY.LB.txt" "dist/NOTES ELITE"
     - name: Create dist zip
       run: |
-        Compress-Archive -Path dist\* -DestinationPath dist.zip
+        mv dist "twipo-synchro-${{ github.ref_name }}"
+        Compress-Archive -Path "twipo-synchro-${{ github.ref_name }}" -DestinationPath "twipo-synchro-${{ github.ref_name }}.zip"
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: twipo-synchro-${{ github.sha }}.zip
-        path: ./dist.zip
+        name: "twipo-synchro-${{ github.sha }}"
+        path: "twipo-synchro-${{ github.ref_name }}"
     - name: Update release
       if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'created')
       uses: actions/upload-release-asset@v1
@@ -174,6 +175,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist.zip
-        asset_name: twipo-synchro-${{ github.ref }}.zip
+        asset_path: "./twipo-synchro-${{ github.ref_name }}.zip"
+        asset_name: "twipo-synchro-${{ github.ref_name }}.zip"
         asset_content_type: application/zip
