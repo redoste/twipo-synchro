@@ -149,7 +149,6 @@ jobs:
         copy "installer-windows-${{ github.sha }}/installer.exe" "dist/installer-win.exe"
         copy "installer-linux-${{ github.sha }}/installer" "dist/installer-linux"
         copy "README.md" "dist/"
-        copy "INSTALL.md" "dist/"
 
         copy "server-${{ github.sha }}/twipo-synchro.exe" "dist/twipo-synchro"
         copy "LICENSE" "dist/twipo-synchro"
