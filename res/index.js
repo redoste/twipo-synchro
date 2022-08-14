@@ -167,7 +167,6 @@ function add_tweep(tweep) {
 	tab.insertBefore(tweep_div, new_tweeps_notification_div.nextSibling);
 
 	tab.scrollTop = old_scroll + tweep_div.offsetHeight;
-	tab.dataset.old_scroll = tab.scrollTop;
 	if (tab.scrollTop > 0) {
 		tab.getElementsByClassName("new_tweeps_notification_span")[0].style.opacity = "100%";
 	}
@@ -190,16 +189,12 @@ function send_reply(tweep_id, reply_id) {
 
 function on_tab_scroll(e) {
 	// Sometimes the browser will call this after we add a Tweep and the tab is still hidden
-	// This will break everything by putting the `dataset.old_scroll` at 0
+	// This will break everything
 	if (e.target.style.display != "inline") {
 		return;
 	}
 
-	let old_scroll = Number(e.target.dataset.old_scroll);
-	let new_scroll = e.target.scrollTop;
-	e.target.dataset.old_scroll = e.target.scrollTop;
-
-	if (new_scroll < old_scroll || new_scroll == 0) {
+	if (e.target.scrollTop == 0) {
 		e.target.getElementsByClassName("new_tweeps_notification_span")[0].style.opacity = "0";
 	}
 }
