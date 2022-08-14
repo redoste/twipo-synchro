@@ -698,6 +698,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
+name = "local-ip-address"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0267899deb46e9d91fa101571cf146db20466c3eb0bb015a65e3259d8634fb3"
+dependencies = [
+ "libc",
+ "memalloc",
+ "neli",
+ "thiserror",
+ "windows",
+]
+
+[[package]]
 name = "lock_api"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -722,6 +735,12 @@ name = "matches"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
+
+[[package]]
+name = "memalloc"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df39d232f5c40b0891c10216992c2f250c054105cb1e56f0fc9032db6203ecc1"
 
 [[package]]
 name = "memchr"
@@ -754,6 +773,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "neli"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9053554eb5dcb7e10d9cdab1206965bde870eed5d0d341532ca035e3ba221508"
+dependencies = [
+ "byteorder",
+ "libc",
 ]
 
 [[package]]
@@ -1146,6 +1175,7 @@ dependencies = [
  "futures",
  "httparse",
  "image",
+ "local-ip-address",
  "serde",
  "serde_json",
  "sha-1",
@@ -1338,6 +1368,49 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "windows"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c47017195a790490df51a3e27f669a7d4f285920d90d03ef970c5d886ef0af1"
+dependencies = [
+ "windows_aarch64_msvc",
+ "windows_i686_gnu",
+ "windows_i686_msvc",
+ "windows_x86_64_gnu",
+ "windows_x86_64_msvc",
+]
+
+[[package]]
+name = "windows_aarch64_msvc"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b12add87e2fb192fff3f4f7e4342b3694785d79f3a64e2c20d5ceb5ccbcfc3cd"
+
+[[package]]
+name = "windows_i686_gnu"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c98f2db372c23965c5e0f43896a8f0316dc0fbe48d1aa65bea9bdd295d43c15"
+
+[[package]]
+name = "windows_i686_msvc"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdf0569be0f2863ab6a12a6ba841fcfa7d107cbc7545a3ebd57685330db0a3ff"
+
+[[package]]
+name = "windows_x86_64_gnu"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "905858262c8380a36f32cb8c1990d7e7c3b7a8170e58ed9a98ca6d940b7ea9f1"
+
+[[package]]
+name = "windows_x86_64_msvc"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "890c3c6341d441ffb38f705f47196e3665dc6dd79f6d72fa185d937326730561"
 
 [[package]]
 name = "winreg"
