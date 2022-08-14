@@ -43,15 +43,20 @@ impl SC3String {
     async fn read_from_stdin(stdin: &mut io::Stdin) -> Result<SC3String, IoError> {
         let mut reached_expression_end = false;
         let mut content: String = String::new();
+        // We count the amount of charcters because `.len()` will return the size in bytes, not the
+        // amount of Unicode characters.
+        // We could use `.chars().count()` but this is O(n) so since we are iterating over the
+        // chars anyway, let's make it O(1).
+        let mut content_utf8_len: usize = 0;
         let mut markers: Vec<SC3Op> = Vec::new();
 
         while !reached_expression_end {
             let mut token = [0u8; 1];
             stdin.read_exact(&mut token).await?;
             match token[0] {
-                0x00 => markers.push(SC3Op::Linebreak(content.len())),
-                0x09 => markers.push(SC3Op::RubyBase(content.len())),
-                0x0B => markers.push(SC3Op::RubyEnd(content.len())),
+                0x00 => markers.push(SC3Op::Linebreak(content_utf8_len)),
+                0x09 => markers.push(SC3Op::RubyBase(content_utf8_len)),
+                0x0B => markers.push(SC3Op::RubyEnd(content_utf8_len)),
                 0x80..=0xFE => {
                     let mut char_lower_half = [0u8; 1];
                     stdin.read_exact(&mut char_lower_half).await?;
@@ -63,6 +68,7 @@ impl SC3String {
                         } else {
                             content.push(character);
                         }
+                        content_utf8_len += 1
                     } else {
                         return Err(IoError::new(ErrorKind::InvalidData, "Unknown codepoint"));
                     }
