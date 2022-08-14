@@ -1,15 +1,20 @@
 const TAB_NAMES = ["a", "b", "c", "d"];
 
 let current_tab;
-function open_tab(tab_id) {
+function open_tab(tab_id, update_scroll) {
 	for(let i in TAB_NAMES) {
 		document.getElementById("sel_" + TAB_NAMES[i]).style.opacity = "0%";
 		document.getElementById("tab_" + TAB_NAMES[i]).style.display = "none";
 	}
 
-	document.getElementById("sel_" + TAB_NAMES[tab_id]).style.opacity = "100%";
-	document.getElementById("tab_" + TAB_NAMES[tab_id]).style.display = "inline";
 	current_tab = tab_id;
+	document.getElementById("sel_" + TAB_NAMES[tab_id]).style.opacity = "100%";
+
+	let target = document.getElementById("tab_" + TAB_NAMES[tab_id]);
+	target.style.display = "inline";
+	if (update_scroll) {
+		on_tab_scroll({target: target});
+	}
 }
 
 function format_text(input_text) {
@@ -55,6 +60,13 @@ function format_text(input_text) {
 const DAY_TEXTS = ["Yesterday", "Today"];
 
 function add_tweep(tweep) {
+	let tab = document.getElementById("tab_" + TAB_NAMES[tweep.tab]);
+	// This is an ugly workaround since `scrollTop` and `offsetHeight` will not work with `display: none`
+	// The elements are not visible, of course they have a height of 0px and can't be scrolled
+	let old_display = tab.style.display;
+	tab.style.display = "inline";
+	let old_scroll = tab.scrollTop;
+
 	let tweep_div = document.createElement("div");
 	tweep_div.classList = "tweep";
 
@@ -151,7 +163,16 @@ function add_tweep(tweep) {
 	}
 	tweep_div.appendChild(details_div);
 
-	document.getElementById("tab_" + TAB_NAMES[tweep.tab]).prepend(tweep_div);
+	let new_tweeps_notification_div = tab.getElementsByClassName("new_tweeps_notification")[0];
+	tab.insertBefore(tweep_div, new_tweeps_notification_div.nextSibling);
+
+	tab.scrollTop = old_scroll + tweep_div.offsetHeight;
+	tab.dataset.old_scroll = tab.scrollTop;
+	if (tab.scrollTop > 0) {
+		tab.getElementsByClassName("new_tweeps_notification_span")[0].style.opacity = "100%";
+	}
+
+	tab.style.display = old_display;
 }
 
 function send_reply(tweep_id, reply_id) {
@@ -167,9 +188,28 @@ function send_reply(tweep_id, reply_id) {
 	return true;
 }
 
+function on_tab_scroll(e) {
+	// Sometimes the browser will call this after we add a Tweep and the tab is still hidden
+	// This will break everything by putting the `dataset.old_scroll` at 0
+	if (e.target.style.display != "inline") {
+		return;
+	}
+
+	let old_scroll = Number(e.target.dataset.old_scroll);
+	let new_scroll = e.target.scrollTop;
+	e.target.dataset.old_scroll = e.target.scrollTop;
+
+	if (new_scroll < old_scroll || new_scroll == 0) {
+		e.target.getElementsByClassName("new_tweeps_notification_span")[0].style.opacity = "0";
+	}
+}
+
 function clear_tweeps() {
 	for(let i in TAB_NAMES) {
-		document.getElementById("tab_" + TAB_NAMES[i]).innerHTML = "";
+		let tab = document.getElementById("tab_" + TAB_NAMES[i]);
+		tab.innerHTML = '<div class="new_tweeps_notification"><span class="new_tweeps_notification_span">↑ See new Tweeps</span></div>';
+		tab.scrollTop = 0;
+		if(tab.onscroll === null) { tab.onscroll = on_tab_scroll; }
 	}
 }
 
@@ -226,13 +266,13 @@ document.addEventListener("touchstart", function(e) {
 document.addEventListener("touchend", function(e) {
 	let dx = e.changedTouches[0].screenX - touch_start;
 	if (Math.abs(dx) > 100) {
-		if (dx > 0 && current_tab > 0) { open_tab(current_tab - 1); }
-		if (dx < 0 && current_tab < 3) { open_tab(current_tab + 1); }
+		if (dx > 0 && current_tab > 0) { open_tab(current_tab - 1, true); }
+		if (dx < 0 && current_tab < 3) { open_tab(current_tab + 1, true); }
 	}
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-	open_tab(0);
+	open_tab(0, false);
 	connect_websocket();
 
 	setInterval(function() {

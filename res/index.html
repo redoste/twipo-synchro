@@ -45,6 +45,25 @@ body {
 #sel_c { right: 25%; }
 #sel_d { right: 0%; }
 
+.new_tweeps_notification {
+	position: absolute;
+	z-index: 10;
+	width: 100%;
+	text-align: center;
+	margin-top: 10px;
+}
+.new_tweeps_notification_span {
+	border: #404040 solid 1px;
+	border-radius: 5px;
+	padding: 4px;
+	background-color: #A0A0A0;
+
+	user-select: none;
+
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
 .author {
 	display: flex;
 	flex-direction: row;
@@ -103,10 +122,10 @@ body {
 		</div>
 		<div class="header_box">
 			<img id="unsel_img" src="img/unsel.png"/>
-			<img id="sel_a" class="sel_img" src="img/sel_a.png" onclick="open_tab(0)"/>
-			<img id="sel_b" class="sel_img" src="img/sel_b.png" onclick="open_tab(1)"/>
-			<img id="sel_c" class="sel_img" src="img/sel_c.png" onclick="open_tab(2)"/>
-			<img id="sel_d" class="sel_img" src="img/sel_d.png" onclick="open_tab(3)"/>
+			<img id="sel_a" class="sel_img" src="img/sel_a.png" onclick="open_tab(0, true)"/>
+			<img id="sel_b" class="sel_img" src="img/sel_b.png" onclick="open_tab(1, true)"/>
+			<img id="sel_c" class="sel_img" src="img/sel_c.png" onclick="open_tab(2, true)"/>
+			<img id="sel_d" class="sel_img" src="img/sel_d.png" onclick="open_tab(3, true)"/>
 		</div>
 		<div class="tweep_box" id="tab_a"></div>
 		<div class="tweep_box" id="tab_b"></div>
