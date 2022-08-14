@@ -3,7 +3,6 @@ name: Check twipo-synchro
 on:
   pull_request:
   push:
-  release:
   workflow_dispatch:
 
 jobs:
