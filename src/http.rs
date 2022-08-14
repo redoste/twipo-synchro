@@ -96,7 +96,18 @@ impl HttpConnection {
                 tweep_id: u32,
                 reply_id: u32,
             }
-            let tweep_reply: TweepReply = serde_json::from_str(message_str)?;
+            // I saw Firefox Focus on Android send a "PING" text message instead of a real ping
+            // message, causing the connection to be dropped. To prevent this kind of stupid
+            // disconnections we will just ignore invalid JSONs.
+            // This doesn't make any sense and I was not able to reproduce it but I swear I saw it,
+            // I'm not crazy.
+            let tweep_reply: TweepReply = match serde_json::from_str(message_str) {
+                Ok(j) => j,
+                Err(e) => {
+                    eprintln!("{} : {}", self.peer_addr, e);
+                    continue;
+                }
+            };
 
             if tweep_reply.r#type != "reply" {
                 return Err(Box::new(IoError::new(
