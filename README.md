@@ -7,7 +7,7 @@
 You can download the latest version from the [releases](https://github.com/redoste/twipo-synchro/releases), make sure to extract the archive before proceeding. This `README` is also present in the archive.
 
 ### Install
-You first need to install the [ROBOTICS;NOTES ELITE Steam Patch](https://sonome.dareno.me/projects/rne-steam.html), the current version of twipo-synchro was tested with the version `1.0.8` of the patch.
+You first need to install the [ROBOTICS;NOTES ELITE Steam Patch](https://sonome.dareno.me/projects/rne-steam.html), the current version of twipo-synchro was tested with the version `1.0.9` of the patch.
 
 On Windows, simply browse to the extraced archive, execute `installer-win.exe` and follow the on-screen instructions.
 
@@ -16,7 +16,7 @@ On Linux, you need to mark the file as executable before. Open a terminal emulat
 chmod +x ./installer-linux
 ./installer-linux
 ```
-The current version of the mod was tested with Proton Experimental build [`9209017`](https://steamdb.info/patchnotes/9209017/).
+The current version of the mod was tested with Proton Experimental build [`10106891`](https://steamdb.info/patchnotes/10106891/).
 
 ### Usage
 After installation, you can start the game as usual from the patch launcher. A new command prompt will be opened after the game starts, it will show the web server logs. It is now possible to connect using another device on the same network by browsing to the web page `http://[local IP address of the computer running the game]:8080/`.

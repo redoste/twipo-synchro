@@ -9,10 +9,10 @@ use std::fs;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 
-const EXPECTED_VERSION: &str = "1.0.8";
+const EXPECTED_VERSION: &str = "1.0.9";
 const CONFIG_KEY: &str = "twipoSynchroListenAddress";
 const CONFIG_VALUE: &str = "0.0.0.0:8080";
-const VERSION_STRING: &[u8] = b"0.2.0\n";
+const VERSION_STRING: &[u8] = b"0.2.1\n";
 
 fn flush() {
     std::io::stdout().flush().unwrap();
