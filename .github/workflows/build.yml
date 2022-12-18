@@ -47,16 +47,15 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Install i686 target
       run: |
-        sudo apt-get install gcc-multilib
-        rustup target add i686-unknown-linux-gnu
+        rustup target add i686-unknown-linux-musl
     - name: Build installer
       run: |
-        cargo build --release --target i686-unknown-linux-gnu --bin installer
+        cargo build --release --target i686-unknown-linux-musl --bin installer
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: installer-linux-${{ github.sha }}
-        path: ./target/i686-unknown-linux-gnu/release/installer
+        path: ./target/i686-unknown-linux-musl/release/installer
   build-lb:
     runs-on: windows-latest
     steps:
