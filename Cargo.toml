@@ -5,20 +5,20 @@ version = "0.2.1"
 edition = "2021"
 
 [dependencies]
-async-std = "1.12"
-async-tungstenite = "0.17"
-base64 = "0.13"
+async-std = "1.13"
+async-tungstenite = "0.28"
+base64 = "0.22"
 futures = "0.3"
-httparse = "1.7"
-image = "0.24"
-local-ip-address = "0.4"
+httparse = "1.9"
+image = "0.25"
+local-ip-address = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha-1 = "0.10"
-tungstenite = "0.17"
+tungstenite = "0.24"
 
 [target.'cfg(windows)'.dependencies]
-winreg = "0.10"
+winreg = "0.52"
 
 [profile.release]
 strip = true
