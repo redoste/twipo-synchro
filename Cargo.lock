@@ -1495,7 +1495,7 @@ dependencies = [
 
 [[package]]
 name = "twipo-synchro"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "async-std",
  "async-tungstenite",

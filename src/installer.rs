@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 const EXPECTED_VERSION: &str = "1.1.0";
 const CONFIG_KEY: &str = "twipoSynchroListenAddress";
 const CONFIG_VALUE: &str = "0.0.0.0:8080";
-const VERSION_STRING: &[u8] = b"0.2.1\n";
+const VERSION_STRING: &[u8] = b"0.2.2\n";
 
 fn flush() {
     std::io::stdout().flush().unwrap();
