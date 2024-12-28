@@ -26,7 +26,7 @@ jobs:
       run: |
         cargo build --release --target i686-pc-windows-msvc --bin installer
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: installer-windows-${{ github.sha }}
         path: ./target/i686-pc-windows-msvc/release/installer.exe
@@ -52,7 +52,7 @@ jobs:
       run: |
         cargo build --release --target i686-unknown-linux-musl --bin installer
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: installer-linux-${{ github.sha }}
         path: ./target/i686-unknown-linux-musl/release/installer
@@ -77,7 +77,7 @@ jobs:
         vcpkg integrate install
         msbuild /p:"Configuration=dinput8-Release;VcpkgUserTriplet=x86-windows-static-md;VcpkgUseStatic=false"
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: lb-${{ github.sha }}
         path: ./LanguageBarrier/dinput8-Release/dinput8.dll
@@ -100,7 +100,7 @@ jobs:
       run: |
         cargo build --release --target i686-pc-windows-msvc --bin twipo-synchro
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: server-${{ github.sha }}
         path: ./target/i686-pc-windows-msvc/release/twipo-synchro.exe
@@ -127,7 +127,7 @@ jobs:
       run: |
         cargo about generate about.hbs > thirdparty.LICENSE.md
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: about-${{ github.sha }}
         path: ./thirdparty.LICENSE.md
@@ -163,7 +163,7 @@ jobs:
         mv dist "twipo-synchro-${{ github.ref_name }}"
         Compress-Archive -Path "twipo-synchro-${{ github.ref_name }}" -DestinationPath "twipo-synchro-${{ github.ref_name }}.zip"
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: "twipo-synchro-${{ github.sha }}"
         path: "twipo-synchro-${{ github.ref_name }}"
