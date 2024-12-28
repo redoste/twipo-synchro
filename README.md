@@ -7,7 +7,7 @@
 You can download the latest version from the [releases](https://github.com/redoste/twipo-synchro/releases), make sure to extract the archive before proceeding. This `README` is also present in the archive.
 
 ### Install
-You first need to install the [ROBOTICS;NOTES ELITE Steam Patch](https://sonome.dareno.me/projects/rne-steam.html), the current version of twipo-synchro was tested with the version `1.0.9` of the patch.
+You first need to install the [ROBOTICS;NOTES ELITE Steam Patch](https://sonome.dareno.me/projects/rne-steam.html), the current version of twipo-synchro was tested with the version `1.1.0` of the patch.
 
 On Windows, simply browse to the extraced archive, execute `installer-win.exe` and follow the on-screen instructions.
 
